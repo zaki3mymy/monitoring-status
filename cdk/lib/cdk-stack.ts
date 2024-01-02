@@ -41,6 +41,7 @@ export class CdkStack extends cdk.Stack {
 
     // EventBridge
     new events.Rule(this, "eventBridge", {
+      ruleName: `${props.projectName}-schedule`,
       schedule: events.Schedule.cron({minute: "0"}),
       targets: [new targets.LambdaFunction(lambdaFunctions, {
         event: events.RuleTargetInput.fromObject({
