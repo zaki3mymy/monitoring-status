@@ -95,6 +95,8 @@ def update_page_properties(id_, properties):
 
 
 def lambda_function(event, context):
+    logger.info("event: %s", event)
+
     database_id = event["DATABASE_ID"]
     property_name_status = event["PROPERTY_NAME_STATUS"]
     property_value_status_done = event["PROPERTY_VALUE_STATUS_DONE"]
