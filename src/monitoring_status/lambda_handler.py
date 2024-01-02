@@ -2,6 +2,7 @@ import json
 import os
 import urllib.parse
 import urllib.request
+from datetime import datetime, timedelta, timezone
 from logging import getLogger
 
 if os.getenv("LOGLEVEL"):
@@ -108,10 +109,17 @@ def lambda_function(event, context):
     )
     results = query_database(database_id, filter_conditions)
 
+    tz = timezone(timedelta(hours=9))
     for r in results:
         id_ = r["id"]
         logger.info("page id: %s", id_)
+
+        # UTC to JST
         last_edited_time = r["last_edited_time"]
+        dt = datetime.fromisoformat(last_edited_time)
+        dt = dt.replace(tzinfo=tz) + timedelta(hours=9)
+        last_edited_time = dt.isoformat()
+
         properties = {
             property_name_publish: {"checkbox": True},
             property_name_publish_date: {
