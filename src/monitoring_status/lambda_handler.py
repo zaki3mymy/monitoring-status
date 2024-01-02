@@ -80,6 +80,37 @@ def query_database(filter_conditions):
     return results
 
 
+def update_page_properties(id_, properties):
+    url = f"{ENDPOINT_ROOT}/pages/{id_}"
+    logger.debug("update_page_properties url: %s", url)
+    body = {
+        "properties": properties,
+    }
+
+    headers = _get_default_header()
+    req = urllib.request.Request(
+        url, json.dumps(body).encode(), headers, method="PATCH"
+    )
+    with urllib.request.urlopen(req) as res:
+        body = json.load(res)
+
+    return body
+
+
 def lambda_function(event, context):
     filter_conditions = _build_filter_conditions()
-    query_database(filter_conditions)
+    results = query_database(filter_conditions)
+
+    for r in results:
+        id_ = r["id"]
+        logger.info("process id: %s", id_)
+        last_edited_time = r["last_edited_time"]
+        properties = {
+            "Publish": {"checkbox": True},
+            "PublishDate": {
+                "date": {
+                    "start": last_edited_time,
+                }
+            },
+        }
+        update_page_properties(id_, properties)
