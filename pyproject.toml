@@ -5,7 +5,9 @@ description = "Add your description here"
 authors = [
     { name = "zaki3mymy", email = "zaki.last@gmail.com" }
 ]
-dependencies = []
+dependencies = [
+    "pydantic>=2.5.3",
+]
 readme = "README.md"
 requires-python = ">= 3.8"
 
