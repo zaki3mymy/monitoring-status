@@ -23,20 +23,19 @@ def _get_default_header():
     }
 
 
-def _build_filter_conditions():
-    PROPERTY_NAME_STATUS = os.environ["PROPERTY_NAME_STATUS"]
-    PROPERTY_VALUE_STATUS_DONE = os.environ["PROPERTY_VALUE_STATUS_DONE"]
-    PROPERTY_NAME_PUBLISH = os.environ["PROPERTY_NAME_PUBLISH"]
+def _build_filter_conditions(
+    property_name_status, property_value_status_done, property_name_publish
+):
     cond = {
         "and": [
             {
-                "property": PROPERTY_NAME_STATUS,
+                "property": property_name_status,
                 "status": {
-                    "equals": PROPERTY_VALUE_STATUS_DONE,
+                    "equals": property_value_status_done,
                 },
             },
             {
-                "property": PROPERTY_NAME_PUBLISH,
+                "property": property_name_publish,
                 "checkbox": {
                     "equals": False,
                 },
@@ -46,13 +45,11 @@ def _build_filter_conditions():
     return cond
 
 
-def query_database(filter_conditions):
+def query_database(database_id, filter_conditions):
     logger.debug("query_database filter conditions: %s", filter_conditions)
 
-    DATABASE_ID = os.environ["DATABASE_ID"]
-    url = f"{ENDPOINT_ROOT}/databases/{DATABASE_ID}/query"
+    url = f"{ENDPOINT_ROOT}/databases/{database_id}/query"
     logger.debug("query_database url: %s", url)
-    filter_conditions = _build_filter_conditions()
 
     results = []
     next_cursor = ""
@@ -98,16 +95,24 @@ def update_page_properties(id_, properties):
 
 
 def lambda_function(event, context):
-    filter_conditions = _build_filter_conditions()
-    results = query_database(filter_conditions)
+    database_id = event["DATABASE_ID"]
+    property_name_status = event["PROPERTY_NAME_STATUS"]
+    property_value_status_done = event["PROPERTY_VALUE_STATUS_DONE"]
+    property_name_publish = event["PROPERTY_NAME_PUBLISH"]
+    property_name_publish_date = event["PROPERTY_NAME_PUBLISH_DATE"]
+
+    filter_conditions = _build_filter_conditions(
+        property_name_status, property_value_status_done, property_name_publish
+    )
+    results = query_database(database_id, filter_conditions)
 
     for r in results:
         id_ = r["id"]
-        logger.info("process id: %s", id_)
+        logger.info("page id: %s", id_)
         last_edited_time = r["last_edited_time"]
         properties = {
-            "Publish": {"checkbox": True},
-            "PublishDate": {
+            property_name_publish: {"checkbox": True},
+            property_name_publish_date: {
                 "date": {
                     "start": last_edited_time,
                 }

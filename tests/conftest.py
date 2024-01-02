@@ -11,7 +11,3 @@ def setenv(monkeypatch):
         config = json.load(f)
 
     monkeypatch.setenv("SECRET_KEY", config["SECRET_KEY"])
-    monkeypatch.setenv("DATABASE_ID", config["DATABASE_ID"])
-    monkeypatch.setenv("PROPERTY_NAME_STATUS", "Status")
-    monkeypatch.setenv("PROPERTY_VALUE_STATUS_DONE", "Done")
-    monkeypatch.setenv("PROPERTY_NAME_PUBLISH", "Publish")
